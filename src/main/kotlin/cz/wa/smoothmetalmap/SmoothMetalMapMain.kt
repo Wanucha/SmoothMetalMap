@@ -1,5 +1,6 @@
-package cz.wa.texturemodifier
+package cz.wa.smoothmetalmap
 
+import cz.wa.smoothmetalmap.gui.MainFrame
 import java.io.File
 
 class SmoothMetalMapMain {
@@ -10,7 +11,9 @@ class SmoothMetalMapMain {
 
         @JvmStatic
         fun main(args: Array<String>) {
-            println("SmoothMetalMap")
+            printTitle()
+            printUsage()
+            MainFrame()
         }
 
         private fun findProperties(args: Array<String>): String {
@@ -36,7 +39,7 @@ class SmoothMetalMapMain {
         }
 
         private fun parseFiles(args: Array<String>): List<String> {
-            return args.filter { SmoothMetalMapMain.IMAGE_EXTS.contains(File(it).extension) }
+            return args.filter { IMAGE_EXTS.contains(File(it).extension) }
         }
 
         fun printTitle(): String {
