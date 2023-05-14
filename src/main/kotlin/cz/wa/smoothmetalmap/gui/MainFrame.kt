@@ -1,6 +1,7 @@
 package cz.wa.smoothmetalmap.gui
 
 import cz.wa.smoothmetalmap.SmoothMetalMapMain
+import cz.wa.smoothmetalmap.commands.MergeMapsCommand
 import cz.wa.smoothmetalmap.gui.help.HelpFrame
 import cz.wa.smoothmetalmap.gui.texturecanvas.DropTextureViewer
 import cz.wa.smoothmetalmap.gui.texturecanvas.TextureViewer
@@ -30,7 +31,10 @@ class MainFrame() : JFrame() {
     private val leftLabel = JLabel("Metallic map [none]")
     private val rightLabel = JLabel("Smoothness map [none]")
 
-    val contentHolder: ContentHolder
+    val contentHolder = ContentHolder()
+    private var leftImage = DropTextureViewer(contentHolder)
+    private var rightImage = DropTextureViewer(contentHolder)
+    private var resultImage = TextureViewer(contentHolder)
 
     init {
         instance = this
@@ -41,8 +45,6 @@ class MainFrame() : JFrame() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
-        contentHolder = ContentHolder()
 
         initComponents()
         val screenSize = Toolkit.getDefaultToolkit().getScreenSize()
@@ -95,22 +97,16 @@ class MainFrame() : JFrame() {
 
         // Images
         // Left
-        var leftImage = DropTextureViewer(contentHolder)
-
         var leftPanel = JPanel(BorderLayout())
         leftPanel.add(BorderLayout.NORTH, leftLabel)
         leftPanel.add(BorderLayout.CENTER, leftImage)
 
         // Right
-        var rightImage = DropTextureViewer(contentHolder)
-
         var rightPanel = JPanel(BorderLayout())
         rightPanel.add(BorderLayout.NORTH, rightLabel)
         rightPanel.add(BorderLayout.CENTER, rightImage)
 
         // Result
-        var resultImage = TextureViewer(contentHolder)
-
         var resultPanel = JPanel(BorderLayout())
         resultPanel.add(BorderLayout.NORTH, JLabel("Result map"))
         resultPanel.add(BorderLayout.CENTER, resultImage)
@@ -124,7 +120,7 @@ class MainFrame() : JFrame() {
 
         // Controls
         var toolPanel = JPanel()
-        toolPanel.add(JLabel(">:-)"))
+        toolPanel.add(JLabel("Drag images to metallic and smoothness"))
 
         var generateButton = JButton("Generate")
         generateButton.addActionListener { generateMap() }
@@ -142,7 +138,10 @@ class MainFrame() : JFrame() {
     }
 
     private fun generateMap() {
-        TODO("Not yet implemented")
+        val img = MergeMapsCommand(leftImage.getImage()!!, rightImage.getImage()!!).generateMap()
+        contentHolder.outputImage = img
+        resultImage.setImage(img)
+        resultImage.refresh()
     }
 
     private fun createBgColorListener(vararg images: TextureViewer): ColorSlider.ValueListener {

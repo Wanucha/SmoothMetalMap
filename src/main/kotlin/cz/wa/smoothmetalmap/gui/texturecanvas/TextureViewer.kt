@@ -104,7 +104,7 @@ open class TextureViewer(val contentHolder: ContentHolder) : Canvas(),
         }
     }
 
-    protected fun getImage(): BufferedImage? {
+    fun getImage(): BufferedImage? {
         return customImage
     }
 
