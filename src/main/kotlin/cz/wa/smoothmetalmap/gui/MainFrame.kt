@@ -2,6 +2,7 @@ package cz.wa.smoothmetalmap.gui
 
 import cz.wa.smoothmetalmap.SmoothMetalMapMain
 import cz.wa.smoothmetalmap.gui.help.HelpFrame
+import cz.wa.smoothmetalmap.gui.texturecanvas.DropTextureViewer
 import cz.wa.smoothmetalmap.gui.texturecanvas.TextureViewer
 import cz.wa.smoothmetalmap.gui.utils.ColorSlider
 import cz.wa.smoothmetalmap.gui.utils.ConfirmFileChooser
@@ -42,9 +43,6 @@ class MainFrame() : JFrame() {
         }
 
         contentHolder = ContentHolder()
-
-        // allow drop files
-        transferHandler = FileTransferHandler()
 
         initComponents()
         val screenSize = Toolkit.getDefaultToolkit().getScreenSize()
@@ -97,14 +95,14 @@ class MainFrame() : JFrame() {
 
         // Images
         // Left
-        var leftImage = TextureViewer(contentHolder)
+        var leftImage = DropTextureViewer(contentHolder)
 
         var leftPanel = JPanel(BorderLayout())
         leftPanel.add(BorderLayout.NORTH, leftLabel)
         leftPanel.add(BorderLayout.CENTER, leftImage)
 
         // Right
-        var rightImage = TextureViewer(contentHolder)
+        var rightImage = DropTextureViewer(contentHolder)
 
         var rightPanel = JPanel(BorderLayout())
         rightPanel.add(BorderLayout.NORTH, rightLabel)
@@ -198,33 +196,6 @@ class MainFrame() : JFrame() {
 
     private fun showHelp() {
         help.isVisible = true
-    }
-
-    private class FileTransferHandler : TransferHandler() {
-        override fun canImport(support: TransferHandler.TransferSupport): Boolean {
-            if (!support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                return false
-            }
-            return true
-        }
-
-        override fun importData(support: TransferSupport): Boolean {
-            if (!canImport(support)) {
-                return false
-            }
-            val t = support.transferable
-            val files =
-                t.getTransferData(DataFlavor.javaFileListFlavor) as List<File>
-            for (file in files) {
-                if (SmoothMetalMapMain.IMAGE_EXTS.contains(file.extension)) {
-                    GuiUtils.runCatch(MainFrame.instance!!, Runnable {
-                        MainFrame.instance!!.openImage(file)
-                    })
-                    return true
-                }
-            }
-            return false
-        }
     }
 
     companion object {
