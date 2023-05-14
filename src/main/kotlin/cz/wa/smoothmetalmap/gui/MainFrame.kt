@@ -174,7 +174,11 @@ class MainFrame() : JFrame() {
             if (imageSaveChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 val file = imageSaveChooser.selectedFile
                 if (!SmoothMetalMapMain.IMAGE_EXTS.contains(file.extension)) {
-                    JOptionPane.showMessageDialog(this, "Unknown image extension: ${file.extension}")
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Unknown image extension: '${file.extension}'" +
+                                "\nType file name with one of supported extensions: ${SmoothMetalMapMain.IMAGE_EXTS.joinToString(", ")}"
+                    )
                     return
                 }
                 GuiUtils.runCatch(this, Runnable {
