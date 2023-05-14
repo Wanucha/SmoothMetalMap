@@ -1,0 +1,1 @@
+copy build\libs\SmoothMetalMap-1.0-SNAPSHOT.jar SmoothMetalMap.jar
