@@ -1,2 +1,2 @@
-# SmoothMetalMap
-Merges smoothness and metallic maps to single image
+# Smooth Metal Map
+Merges smoothnes and metallic maps to single image
