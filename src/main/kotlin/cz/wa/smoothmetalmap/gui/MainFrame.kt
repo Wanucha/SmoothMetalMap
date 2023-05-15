@@ -12,7 +12,6 @@ import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Rectangle
 import java.awt.Toolkit
-import java.awt.datatransfer.DataFlavor
 import java.awt.event.KeyEvent
 import java.awt.image.BufferedImage
 import java.io.File
@@ -35,6 +34,7 @@ class MainFrame() : JFrame() {
     private var leftImage = DropTextureViewer(contentHolder)
     private var rightImage = DropTextureViewer(contentHolder)
     private var resultImage = TextureViewer(contentHolder)
+    private var roughnessCB = JCheckBox("Roughness (invert smooth)")
 
     init {
         instance = this
@@ -73,6 +73,7 @@ class MainFrame() : JFrame() {
         imageSaveChooser.addChoosableFileFilter(FileNameExtensionFilter("Jpeg", "jpeg"))
         imageSaveChooser.addChoosableFileFilter(FileNameExtensionFilter("Gif", "gif"))
         imageSaveChooser.addChoosableFileFilter(FileNameExtensionFilter("Bmp", "bmp"))
+        imageSaveChooser.fileFilter = imagesFilter
 
         // args help
         val argsHelp = JMenuItem("Program args")
@@ -122,6 +123,11 @@ class MainFrame() : JFrame() {
         var toolPanel = JPanel()
         toolPanel.add(JLabel("Drag images to metallic and smoothness"))
 
+        toolPanel.add(JLabel("                     "))
+
+        roughnessCB.isSelected = true
+        toolPanel.add(roughnessCB)
+
         var generateButton = JButton("Generate")
         generateButton.addActionListener { generateMap() }
         toolPanel.add(generateButton)
@@ -138,7 +144,7 @@ class MainFrame() : JFrame() {
     }
 
     private fun generateMap() {
-        val img = MergeMapsCommand(leftImage.getImage()!!, rightImage.getImage()!!).generateMap()
+        val img = MergeMapsCommand(leftImage.getImage()!!, rightImage.getImage()!!, roughnessCB.isSelected).generateMap()
         contentHolder.outputImage = img
         resultImage.setImage(img)
         resultImage.refresh()
@@ -172,7 +178,11 @@ class MainFrame() : JFrame() {
     fun saveImage() {
         if (contentHolder.outputImage != null) {
             if (imageSaveChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-                val file = imageSaveChooser.selectedFile
+                var file = imageSaveChooser.selectedFile
+                if (file.extension.isBlank()) {
+                   file = File(file.absolutePath + ".png")
+                }
+
                 if (!SmoothMetalMapMain.IMAGE_EXTS.contains(file.extension)) {
                     JOptionPane.showMessageDialog(
                         this,

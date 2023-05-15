@@ -5,6 +5,8 @@
 /gradle/
 *.jar
 /img/
+*.rar
+*.zip
 
 ### STS ###
 .apt_generated

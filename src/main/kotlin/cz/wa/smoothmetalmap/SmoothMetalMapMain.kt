@@ -6,7 +6,7 @@ import java.io.File
 class SmoothMetalMapMain {
 
     companion object {
-        const val VERSION = "0.1.0"
+        const val VERSION = "0.1.1"
         val IMAGE_EXTS = arrayOf("png", "jpg", "jpeg", "gif", "bmp")
 
         @JvmStatic
@@ -14,20 +14,6 @@ class SmoothMetalMapMain {
             printTitle()
             printUsage()
             MainFrame()
-        }
-
-        private fun findProperties(args: Array<String>): String {
-            var ret = ""
-            for (arg in args) {
-                if (arg.endsWith(".properties")) {
-                    if (ret.isEmpty()) {
-                        ret = arg
-                    } else {
-                        println("Multiple properties, ignored: " + arg)
-                    }
-                }
-            }
-            return ret
         }
 
         private fun printMessages(e: Throwable) {
