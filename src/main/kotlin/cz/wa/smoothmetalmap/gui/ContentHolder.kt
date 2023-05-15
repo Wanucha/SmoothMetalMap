@@ -13,7 +13,7 @@ class ContentHolder() {
 
     var outputImage: BufferedImage? = null
 
-    var lastFile: String? = null
+    var lastFile: File? = null
 
     init {
         sourceLeftImage = ImageUtils.createEmptyImage(1, 1)

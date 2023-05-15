@@ -6,7 +6,7 @@ import java.io.File
 class SmoothMetalMapMain {
 
     companion object {
-        const val VERSION = "0.1.1"
+        const val VERSION = "0.2.0"
         val IMAGE_EXTS = arrayOf("png", "jpg", "jpeg", "gif", "bmp")
 
         @JvmStatic

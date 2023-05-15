@@ -6,14 +6,26 @@ import cz.wa.smoothmetalmap.gui.MainFrame
 import cz.wa.smoothmetalmap.gui.utils.GuiUtils
 import java.awt.datatransfer.DataFlavor
 import java.awt.dnd.*
+import java.awt.image.BufferedImage
 import java.io.File
 import java.util.*
 import javax.imageio.ImageIO
 
-
+/**
+ * Allows drag and drop images from OS
+ */
 class DropTextureViewer(contentHolder: ContentHolder) : TextureViewer(contentHolder) {
     private var dropTarget: DropTarget? = null
     private var dropTargetHandler: DropTargetHandler? = null
+    private val listeners = HashSet<(File, BufferedImage) -> Unit>()
+
+    fun addListener(l: (File, BufferedImage) -> Unit) {
+        listeners.add(l)
+    }
+
+    fun removeListener(l: (File, BufferedImage) -> Unit) {
+        listeners.remove(l)
+    }
 
     private fun importFiles(files: List<File>) {
         for (file in files) {
@@ -21,6 +33,9 @@ class DropTextureViewer(contentHolder: ContentHolder) : TextureViewer(contentHol
                 GuiUtils.runCatch(MainFrame.instance!!, Runnable {
                     customImage = ImageIO.read(file)
                     refresh()
+                    for (l in listeners) {
+                        l.invoke(file, customImage!!)
+                    }
                 })
             }
         }
@@ -54,7 +69,7 @@ class DropTextureViewer(contentHolder: ContentHolder) : TextureViewer(contentHol
         getMyDropTarget()?.removeDropTargetListener(getDropTargetHandler())
     }
 
-    protected class DropTargetHandler(val viewer: DropTextureViewer) : DropTargetListener {
+    protected class DropTargetHandler(private val viewer: DropTextureViewer) : DropTargetListener {
         protected fun processDrag(dtde: DropTargetDragEvent) {
             if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                 dtde.acceptDrag(DnDConstants.ACTION_COPY)

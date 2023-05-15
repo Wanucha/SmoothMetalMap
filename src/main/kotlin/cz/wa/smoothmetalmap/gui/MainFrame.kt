@@ -24,7 +24,7 @@ class MainFrame() : JFrame() {
     private val menu: JMenuBar = JMenuBar()
     private val help: HelpFrame = HelpFrame()
     private val imageSaveChooser = ConfirmFileChooser()
-    private val imagesFilter = FileNameExtensionFilter("Images (PNG, JPG, GIF, BMP)", *SmoothMetalMapMain.IMAGE_EXTS)
+    private val imagesFilter = FileNameExtensionFilter("Images (PNG)", "png")
     private val splitSource = JSplitPane(JSplitPane.HORIZONTAL_SPLIT)
     private val splitMain = JSplitPane(JSplitPane.HORIZONTAL_SPLIT)
     private val leftLabel = JLabel("Metallic map [none]")
@@ -47,7 +47,7 @@ class MainFrame() : JFrame() {
         }
 
         initComponents()
-        val screenSize = Toolkit.getDefaultToolkit().getScreenSize()
+        val screenSize = Toolkit.getDefaultToolkit().screenSize
         val initW = 800
         val initH = 500
         bounds = Rectangle((screenSize.width - initW) / 2, (screenSize.height - initH) / 2, initW, initH)
@@ -65,14 +65,9 @@ class MainFrame() : JFrame() {
         menu.add(imageMenu)
 
         val saveImage = JMenuItem("Save as")
-        saveImage.addActionListener({ saveImage() })
+        saveImage.addActionListener { saveImage() }
         saveImage.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK)
         imageMenu.add(saveImage)
-        imageSaveChooser.addChoosableFileFilter(FileNameExtensionFilter("Png", "png"))
-        imageSaveChooser.addChoosableFileFilter(FileNameExtensionFilter("Jpg", "jpg"))
-        imageSaveChooser.addChoosableFileFilter(FileNameExtensionFilter("Jpeg", "jpeg"))
-        imageSaveChooser.addChoosableFileFilter(FileNameExtensionFilter("Gif", "gif"))
-        imageSaveChooser.addChoosableFileFilter(FileNameExtensionFilter("Bmp", "bmp"))
         imageSaveChooser.fileFilter = imagesFilter
 
         // args help
@@ -94,15 +89,20 @@ class MainFrame() : JFrame() {
         // bg color
         val bgColor = ColorSlider()
         bgColor.toolTipText = "Change background color"
+        bgColor.addListener{bgColorChanged(it)}
         menu.add(bgColor)
 
         // Images
         // Left
+        leftImage.addListener{file, image -> leftImageUpdated(file, image)}
+
         var leftPanel = JPanel(BorderLayout())
         leftPanel.add(BorderLayout.NORTH, leftLabel)
         leftPanel.add(BorderLayout.CENTER, leftImage)
 
         // Right
+        rightImage.addListener{file, image -> rightImageUpdated(file, image)}
+
         var rightPanel = JPanel(BorderLayout())
         rightPanel.add(BorderLayout.NORTH, rightLabel)
         rightPanel.add(BorderLayout.CENTER, rightImage)
@@ -139,10 +139,24 @@ class MainFrame() : JFrame() {
         layout = BorderLayout()
         add(toolPanel, BorderLayout.NORTH)
         add(splitMain, BorderLayout.CENTER)
-
-        bgColor.addListener(createBgColorListener(leftImage, rightImage, resultImage))
     }
 
+    private fun leftImageUpdated(file: File, image: BufferedImage) {
+        updateSaveFile(file)
+        contentHolder.lastFile = file
+        leftLabel.text = "Metallic map [${image.width}x${image.height}]"
+    }
+
+    private fun updateSaveFile(file: File) {
+        if (contentHolder.lastFile == null) {
+            imageSaveChooser.currentDirectory = file.parentFile
+        }
+    }
+
+    private fun rightImageUpdated(file: File, image: BufferedImage) {
+        contentHolder.lastFile = file
+        rightLabel.text = "Smoothness map [${image.width}x${image.height}]"
+    }
     private fun generateMap() {
         val img = MergeMapsCommand(leftImage.getImage()!!, rightImage.getImage()!!, roughnessCB.isSelected).generateMap()
         contentHolder.outputImage = img
@@ -150,15 +164,11 @@ class MainFrame() : JFrame() {
         resultImage.refresh()
     }
 
-    private fun createBgColorListener(vararg images: TextureViewer): ColorSlider.ValueListener {
-        return object : ColorSlider.ValueListener {
-            override fun valueChanged(value: Int) {
-                contentHolder.settings.guiBgColor = Color(value, value, value)
-                for (image in images) {
-                    image.refresh()
-                }
-            }
-        }
+    private fun bgColorChanged(value: Int) {
+        contentHolder.settings.guiBgColor = Color(value, value, value)
+        leftImage.refresh()
+        rightImage.refresh()
+        resultImage.refresh()
     }
 
     private fun loadIcons(): List<BufferedImage> {
@@ -169,13 +179,7 @@ class MainFrame() : JFrame() {
         )
     }
 
-    private fun openImage(file: File) {
-        //contentHolder.sourceImage = ImageIO.read(file)
-        contentHolder.lastFile = file.absolutePath
-        imageSaveChooser.selectedFile = file
-    }
-
-    fun saveImage() {
+    private fun saveImage() {
         if (contentHolder.outputImage != null) {
             if (imageSaveChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 var file = imageSaveChooser.selectedFile

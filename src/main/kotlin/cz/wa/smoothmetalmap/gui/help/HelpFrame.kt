@@ -8,13 +8,23 @@ import javax.swing.JScrollPane
 
 class HelpFrame: JFrame("Smooth Metal Map Help") {
     init {
-        bounds = Rectangle(200, 200, 540, 620)
+        bounds = Rectangle(200, 200, 500, 300)
 
         layout = BorderLayout()
 
         var text1 = JLabel()
         text1.text = "<html>" +
-                "TODO" +
+                "Merges metallic and smoothness/roughness map to be used in Unity" +
+                "<ol>" +
+                "<li>Drag image to metallic window</li>" +
+                "<li>Drag image to smoothness window" +
+                "<ul>" +
+                "<li>If the map represents roughness, keep the checkbox selected</li>" +
+                "<li>If the map represents smoothness, uncheck the checkbox</li>" +
+                "</ul></li>" +
+                "<li>Click Generate</li>" +
+                "<li>Save the file as .png</li>" +
+                "</ol>" +
                 "</html>"
 
         var scroll = JScrollPane(text1)

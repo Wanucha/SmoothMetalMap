@@ -21,7 +21,7 @@ class ColorSlider() : JPanel(), MouseListener, MouseMotionListener {
 
     private var bgImage: BufferedImage = generateBgImage()
     private var mouseDown = false
-    private val listeners = HashSet<ValueListener>()
+    private val listeners = HashSet<(Int) -> Unit>()
 
     var value = 0
         set(value) {
@@ -68,11 +68,11 @@ class ColorSlider() : JPanel(), MouseListener, MouseMotionListener {
         paint(graphics)
     }
 
-    fun addListener(l: ValueListener) {
+    fun addListener(l: (Int) -> Unit) {
         listeners.add(l)
     }
 
-    fun removeListener(l: ValueListener) {
+    fun removeListener(l: (Int) -> Unit) {
         listeners.remove(l)
     }
 
@@ -102,7 +102,7 @@ class ColorSlider() : JPanel(), MouseListener, MouseMotionListener {
             value = (256f * (e.x / width.toFloat())).roundToInt()
             refresh()
             for (l in listeners) {
-                l.valueChanged(value)
+                l.invoke(value)
             }
         }
     }
