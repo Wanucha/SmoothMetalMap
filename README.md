@@ -1,9 +1,12 @@
 # Smooth Metal Map
-Merges smoothness/roughness and metallic maps to single image, that can be used in Unity.
+* Forum: https://discord.gg/cE9ZmNGJSP
+* Github: https://github.com/Wanucha/SmoothMetalMap
+* Merges smoothness/roughness and metallic maps to single image, that can be used in Unity.
+* Can be used only with GUI, command line is not implemented yet
 ## Function
 * Takes average RGB from metallic map and stores to result red channel
 * Takes average RGB from smoothness map and stores to alpha channel
-* In case of roughness, recalculates: alpha = 255 - alpha
+* In case of roughness inverts alpha channel: a = 255 - a
 * Result green and blue channels are 0
 ## Usage
 1. Drag metallic map to the left panel
