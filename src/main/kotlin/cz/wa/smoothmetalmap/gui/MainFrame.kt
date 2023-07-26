@@ -3,6 +3,7 @@ package cz.wa.smoothmetalmap.gui
 import cz.wa.smoothmetalmap.SmoothMetalMapMain
 import cz.wa.smoothmetalmap.commands.MergeMapsCommand
 import cz.wa.smoothmetalmap.gui.help.HelpFrame
+import cz.wa.smoothmetalmap.gui.simplemap.SimpleMapFrame
 import cz.wa.smoothmetalmap.gui.texturecanvas.DropTextureViewer
 import cz.wa.smoothmetalmap.gui.texturecanvas.TextureViewer
 import cz.wa.smoothmetalmap.gui.utils.ColorSlider
@@ -35,6 +36,8 @@ class MainFrame : JFrame() {
     private var rightImage = DropTextureViewer(contentHolder)
     private var resultImage = TextureViewer(contentHolder)
     private var roughnessCB = JCheckBox("Roughness (invert smooth)")
+
+    private val simpleMapFrame = SimpleMapFrame(leftImage, rightImage)
 
     init {
         instance = this
@@ -123,6 +126,11 @@ class MainFrame : JFrame() {
         val toolPanel = JPanel()
         toolPanel.add(JLabel("Drag images to metallic and smoothness"))
 
+        // Generate map button
+        val generateMapB = JButton("Generate map")
+        generateMapB.addActionListener { openGenerateMap() }
+        toolPanel.add(generateMapB)
+
         toolPanel.add(JLabel("                     "))
 
         roughnessCB.isSelected = true
@@ -141,9 +149,12 @@ class MainFrame : JFrame() {
         add(splitMain, BorderLayout.CENTER)
     }
 
-    private fun leftImageUpdated(file: File, image: BufferedImage) {
-        updateSaveFile(file)
-        contentHolder.lastFile = file
+    private fun leftImageUpdated(file: File?, image: BufferedImage) {
+        if (file != null) {
+            updateSaveFile(file)
+            contentHolder.lastFile = file
+        }
+        contentHolder.sourceLeftImage = image
         leftLabel.text = "Metallic map [${image.width}x${image.height}]"
     }
 
@@ -153,10 +164,18 @@ class MainFrame : JFrame() {
         }
     }
 
-    private fun rightImageUpdated(file: File, image: BufferedImage) {
-        contentHolder.lastFile = file
+    private fun rightImageUpdated(file: File?, image: BufferedImage) {
+        if (file != null) {
+            contentHolder.lastFile = file
+        }
+        contentHolder.sourceRightImage = image
         rightLabel.text = "Smoothness map [${image.width}x${image.height}]"
     }
+
+    private fun openGenerateMap() {
+        simpleMapFrame.isVisible = true
+    }
+
     private fun generateMap() {
         GuiUtils.runCatch(this) {
             val img = MergeMapsCommand(leftImage.getImage()!!, rightImage.getImage()!!, roughnessCB.isSelected).generateMap()

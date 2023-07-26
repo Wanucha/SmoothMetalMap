@@ -22,6 +22,13 @@ class HelpFrame: JFrame("Smooth Metal Map Help") {
                 "<li>If the map represents roughness, keep the checkbox selected</li>" +
                 "<li>If the map represents smoothness, uncheck the checkbox</li>" +
                 "</ul></li>" +
+                "<li>If you don't have one of the maps, you can generate it" +
+                "<ul>" +
+                "<li>Load the map that you have</li>" +
+                "<li>Click Generate map</li>" +
+                "<li>Choose intensity</li>" +
+                "<li>Generate the missing map, the dimensions will be the same</li>" +
+                "</ul></li>" +
                 "<li>Click Generate</li>" +
                 "<li>Save the file as .png</li>" +
                 "</ol>" +

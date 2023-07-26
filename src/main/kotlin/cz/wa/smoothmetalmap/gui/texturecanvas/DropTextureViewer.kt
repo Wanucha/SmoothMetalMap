@@ -17,14 +17,26 @@ import javax.imageio.ImageIO
 class DropTextureViewer(contentHolder: ContentHolder) : TextureViewer(contentHolder) {
     private var dropTarget: DropTarget? = null
     private var dropTargetHandler: DropTargetHandler? = null
-    private val listeners = HashSet<(File, BufferedImage) -> Unit>()
+    private val listeners = HashSet<(File?, BufferedImage) -> Unit>()
 
-    fun addListener(l: (File, BufferedImage) -> Unit) {
+    fun addListener(l: (File?, BufferedImage) -> Unit) {
         listeners.add(l)
     }
 
-    fun removeListener(l: (File, BufferedImage) -> Unit) {
+    fun removeListener(l: (File?, BufferedImage) -> Unit) {
         listeners.remove(l)
+    }
+
+    fun getCustomImage1() : BufferedImage? {
+        return customImage;
+    }
+
+    fun setCustomImage1(image: BufferedImage) {
+        customImage = image
+        refresh()
+        for (l in listeners) {
+            l.invoke(null, customImage!!)
+        }
     }
 
     private fun importFiles(files: List<File>) {
@@ -37,6 +49,7 @@ class DropTextureViewer(contentHolder: ContentHolder) : TextureViewer(contentHol
                         l.invoke(file, customImage!!)
                     }
                 }
+                return
             }
         }
     }
