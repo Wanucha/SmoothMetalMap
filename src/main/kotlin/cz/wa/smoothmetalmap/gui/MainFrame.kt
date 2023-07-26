@@ -20,7 +20,7 @@ import javax.swing.*
 import javax.swing.filechooser.FileNameExtensionFilter
 
 
-class MainFrame() : JFrame() {
+class MainFrame : JFrame() {
     private val menu: JMenuBar = JMenuBar()
     private val help: HelpFrame = HelpFrame()
     private val imageSaveChooser = ConfirmFileChooser()
@@ -30,7 +30,7 @@ class MainFrame() : JFrame() {
     private val leftLabel = JLabel("Metallic map [none]")
     private val rightLabel = JLabel("Smoothness map [none]")
 
-    val contentHolder = ContentHolder()
+    private val contentHolder = ContentHolder()
     private var leftImage = DropTextureViewer(contentHolder)
     private var rightImage = DropTextureViewer(contentHolder)
     private var resultImage = TextureViewer(contentHolder)
@@ -96,19 +96,19 @@ class MainFrame() : JFrame() {
         // Left
         leftImage.addListener{file, image -> leftImageUpdated(file, image)}
 
-        var leftPanel = JPanel(BorderLayout())
+        val leftPanel = JPanel(BorderLayout())
         leftPanel.add(BorderLayout.NORTH, leftLabel)
         leftPanel.add(BorderLayout.CENTER, leftImage)
 
         // Right
         rightImage.addListener{file, image -> rightImageUpdated(file, image)}
 
-        var rightPanel = JPanel(BorderLayout())
+        val rightPanel = JPanel(BorderLayout())
         rightPanel.add(BorderLayout.NORTH, rightLabel)
         rightPanel.add(BorderLayout.CENTER, rightImage)
 
         // Result
-        var resultPanel = JPanel(BorderLayout())
+        val resultPanel = JPanel(BorderLayout())
         resultPanel.add(BorderLayout.NORTH, JLabel("Result map"))
         resultPanel.add(BorderLayout.CENTER, resultImage)
 
@@ -120,7 +120,7 @@ class MainFrame() : JFrame() {
         splitMain.rightComponent = resultPanel
 
         // Controls
-        var toolPanel = JPanel()
+        val toolPanel = JPanel()
         toolPanel.add(JLabel("Drag images to metallic and smoothness"))
 
         toolPanel.add(JLabel("                     "))
@@ -128,11 +128,11 @@ class MainFrame() : JFrame() {
         roughnessCB.isSelected = true
         toolPanel.add(roughnessCB)
 
-        var generateButton = JButton("Generate")
+        val generateButton = JButton("Generate")
         generateButton.addActionListener { generateMap() }
         toolPanel.add(generateButton)
 
-        var saveButton = JButton("Save as")
+        val saveButton = JButton("Save as")
         saveButton.addActionListener { saveImage() }
         toolPanel.add(saveButton)
 
@@ -158,10 +158,12 @@ class MainFrame() : JFrame() {
         rightLabel.text = "Smoothness map [${image.width}x${image.height}]"
     }
     private fun generateMap() {
-        val img = MergeMapsCommand(leftImage.getImage()!!, rightImage.getImage()!!, roughnessCB.isSelected).generateMap()
-        contentHolder.outputImage = img
-        resultImage.setImage(img)
-        resultImage.refresh()
+        GuiUtils.runCatch(this) {
+            val img = MergeMapsCommand(leftImage.getImage()!!, rightImage.getImage()!!, roughnessCB.isSelected).generateMap()
+            contentHolder.outputImage = img
+            resultImage.setImage(img)
+            resultImage.refresh()
+        }
     }
 
     private fun bgColorChanged(value: Int) {
@@ -187,20 +189,20 @@ class MainFrame() : JFrame() {
                    file = File(file.absolutePath + ".png")
                 }
 
-                if (!SmoothMetalMapMain.IMAGE_EXTS.contains(file.extension)) {
+                if (!SmoothMetalMapMain.IMAGE_SAVE_EXTS.contains(file.extension.lowercase())) {
                     JOptionPane.showMessageDialog(
                         this,
                         "Unknown image extension: '${file.extension}'" +
-                                "\nType file name with one of supported extensions: ${SmoothMetalMapMain.IMAGE_EXTS.joinToString(", ")}"
+                                "\nType file name with one of supported extensions: ${SmoothMetalMapMain.IMAGE_SAVE_EXTS.joinToString(", ")}"
                     )
                     return
                 }
-                GuiUtils.runCatch(this, Runnable {
+                GuiUtils.runCatch(this) {
                     ImageIO.write(contentHolder.outputImage, file.extension, file)
                     if (!file.isFile) {
                         JOptionPane.showMessageDialog(this@MainFrame, "File not saved: ${file.absolutePath}")
                     }
-                })
+                }
             }
         }
     }

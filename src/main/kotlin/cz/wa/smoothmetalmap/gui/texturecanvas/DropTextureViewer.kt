@@ -29,14 +29,14 @@ class DropTextureViewer(contentHolder: ContentHolder) : TextureViewer(contentHol
 
     private fun importFiles(files: List<File>) {
         for (file in files) {
-            if (SmoothMetalMapMain.IMAGE_EXTS.contains(file.extension)) {
-                GuiUtils.runCatch(MainFrame.instance!!, Runnable {
+            if (SmoothMetalMapMain.IMAGE_OPEN_EXTS.contains(file.extension.lowercase())) {
+                GuiUtils.runCatch(MainFrame.instance!!) {
                     customImage = ImageIO.read(file)
                     refresh()
                     for (l in listeners) {
                         l.invoke(file, customImage!!)
                     }
-                })
+                }
             }
         }
     }

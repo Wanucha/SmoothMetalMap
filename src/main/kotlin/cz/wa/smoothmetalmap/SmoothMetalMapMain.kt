@@ -6,8 +6,9 @@ import java.io.File
 class SmoothMetalMapMain {
 
     companion object {
-        const val VERSION = "0.2.0"
-        val IMAGE_EXTS = arrayOf("png", "jpg", "jpeg", "gif", "bmp")
+        const val VERSION = "0.2.1"
+        val IMAGE_OPEN_EXTS = arrayOf("png", "jpg", "jpeg", "gif", "bmp")
+        val IMAGE_SAVE_EXTS = arrayOf("png", "gif", "bmp")
 
         @JvmStatic
         fun main(args: Array<String>) {
@@ -25,7 +26,7 @@ class SmoothMetalMapMain {
         }
 
         private fun parseFiles(args: Array<String>): List<String> {
-            return args.filter { IMAGE_EXTS.contains(File(it).extension) }
+            return args.filter { IMAGE_OPEN_EXTS.contains(File(it).extension.lowercase()) }
         }
 
         fun printTitle(): String {
