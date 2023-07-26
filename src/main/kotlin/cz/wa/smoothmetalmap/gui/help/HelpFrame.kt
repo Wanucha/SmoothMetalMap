@@ -25,7 +25,7 @@ class HelpFrame: JFrame("Smooth Metal Map Help") {
                 "<li>If you don't have one of the maps, you can generate it" +
                 "<ul>" +
                 "<li>Load the map that you have</li>" +
-                "<li>Click Generate map</li>" +
+                "<li>Click Generate missing</li>" +
                 "<li>Choose intensity</li>" +
                 "<li>Generate the missing map, the dimensions will be the same</li>" +
                 "</ul></li>" +

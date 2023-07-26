@@ -12,5 +12,10 @@
 1. Drag metallic map to the left panel
 2. Drag smoothness or roughness map to the middle panel **(both images must have same resolution)**
 3. If you have smoothness map, uncheck 'invert', if you have roughness, check 'invert'
-4. Click generate
-5. Save the result file
+4. If you are missing one of the maps, you can generate it
+   1. The first map must be loaded
+   2. Click Generate missing
+   3. Choose intensity
+   4. Generate the missing map, the dimensions will be same as the other map
+5. Click generate
+6. Save the result file

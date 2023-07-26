@@ -127,7 +127,7 @@ class MainFrame : JFrame() {
         toolPanel.add(JLabel("Drag images to metallic and smoothness"))
 
         // Generate map button
-        val generateMapB = JButton("Generate map")
+        val generateMapB = JButton("Generate missing")
         generateMapB.addActionListener { openGenerateMap() }
         toolPanel.add(generateMapB)
 
