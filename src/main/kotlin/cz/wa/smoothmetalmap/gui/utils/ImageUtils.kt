@@ -3,6 +3,7 @@ package cz.wa.smoothmetalmap.gui.utils
 import java.awt.image.BufferedImage
 import java.awt.image.DataBufferByte
 import java.awt.image.DataBufferInt
+import java.lang.Exception
 
 class ImageUtils {
     companion object {
@@ -24,10 +25,14 @@ class ImageUtils {
         }
 
         fun getImageWithIntBuffer(img: BufferedImage) : BufferedImage {
-            if (img.raster.dataBuffer is DataBufferInt) {
-                return img
-            } else {
-                return convertToIntBuffer(img)
+            try {
+                if (img.raster.dataBuffer is DataBufferInt) {
+                    return img
+                } else {
+                    return convertToIntBuffer(img)
+                }
+            } catch (e: Exception) {
+                throw RuntimeException("Failed to convert image buffer, try saving the image in different program.", e)
             }
         }
 
@@ -37,7 +42,7 @@ class ImageUtils {
             val data = (img.raster.dataBuffer as DataBufferByte).data
 
             val length = img.width * img.height
-            if (length == data.size && img.type != BufferedImage.TYPE_BYTE_INDEXED) {
+            if (length * 4 == data.size && img.type != BufferedImage.TYPE_BYTE_INDEXED) {
                 for (i in 0 until length) {
                     val i2 = i * 4
                     outData[i] =
