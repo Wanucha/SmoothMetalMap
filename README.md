@@ -7,6 +7,7 @@
 * Takes average RGB from metallic map and stores to result red channel
 * Takes average RGB from smoothness map and stores to alpha channel
 * In case of roughness inverts alpha channel: a = 255 - a
+* Option to clamp alpha to 1..255 to prevent color loss on alpha 0
 * Result green and blue channels are 0
 ## Usage
 1. Drag metallic map to the left panel

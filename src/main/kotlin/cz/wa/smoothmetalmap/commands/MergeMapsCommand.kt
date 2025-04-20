@@ -6,7 +6,12 @@ import cz.wa.smoothmetalmap.image.Texture
 import java.awt.image.BufferedImage
 import kotlin.math.roundToInt
 
-class MergeMapsCommand(private val metallicMap: BufferedImage, private val smoothnessMap: BufferedImage, private val roughness: Boolean) {
+class MergeMapsCommand(
+    private val metallicMap: BufferedImage,
+    private val smoothnessMap: BufferedImage,
+    private val roughness: Boolean,
+    private val noAlpha0: Boolean
+) {
 
     fun generateMap(): BufferedImage {
         check(metallicMap.width == smoothnessMap.width && metallicMap.height == smoothnessMap.height) { "The input images must have same dimensions" }
@@ -28,12 +33,15 @@ class MergeMapsCommand(private val metallicMap: BufferedImage, private val smoot
     }
 
     private fun convertPixel(inTexM: Texture, inTexS: Texture, x: Int, y: Int, outTex: Texture) {
-        var pM = inTexM.getPoint(x, y)
-        var pS = inTexS.getPoint(x, y)
-        var r = getAverageColor(pM)
+        val pM = inTexM.getPoint(x, y)
+        val pS = inTexS.getPoint(x, y)
+        val r = getAverageColor(pM)
         var a = getAverageColor(pS)
         if (roughness) {
             a = 255 - a
+        }
+        if (noAlpha0 && a <= 0) {
+            a = 1
         }
         outTex.setPoint(x, y, ColorUtils.fromRGBA(r, 0, 0, a))
     }

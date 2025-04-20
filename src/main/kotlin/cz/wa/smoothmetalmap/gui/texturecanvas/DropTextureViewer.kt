@@ -14,7 +14,7 @@ import javax.imageio.ImageIO
 /**
  * Allows drag and drop images from OS
  */
-class DropTextureViewer(contentHolder: ContentHolder) : TextureViewer(contentHolder) {
+open class DropTextureViewer(contentHolder: ContentHolder) : TextureViewer(contentHolder) {
     private var dropTarget: DropTarget? = null
     private var dropTargetHandler: DropTargetHandler? = null
     private val listeners = HashSet<(File?, BufferedImage) -> Unit>()
@@ -28,7 +28,7 @@ class DropTextureViewer(contentHolder: ContentHolder) : TextureViewer(contentHol
     }
 
     fun getCustomImage1() : BufferedImage? {
-        return customImage;
+        return customImage
     }
 
     fun setCustomImage1(image: BufferedImage) {
@@ -54,7 +54,7 @@ class DropTextureViewer(contentHolder: ContentHolder) : TextureViewer(contentHol
         }
     }
 
-    protected fun getMyDropTarget(): DropTarget? {
+    private fun getMyDropTarget(): DropTarget? {
         if (dropTarget == null) {
             dropTarget = DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, null)
         }
@@ -82,7 +82,7 @@ class DropTextureViewer(contentHolder: ContentHolder) : TextureViewer(contentHol
         getMyDropTarget()?.removeDropTargetListener(getDropTargetHandler())
     }
 
-    protected class DropTargetHandler(private val viewer: DropTextureViewer) : DropTargetListener {
+    protected open class DropTargetHandler(private val viewer: DropTextureViewer) : DropTargetListener {
         protected fun processDrag(dtde: DropTargetDragEvent) {
             if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                 dtde.acceptDrag(DnDConstants.ACTION_COPY)
@@ -117,7 +117,7 @@ class DropTextureViewer(contentHolder: ContentHolder) : TextureViewer(contentHol
                 dtde.acceptDrop(dtde.dropAction)
                 try {
                     val transferData = transferable.getTransferData(DataFlavor.javaFileListFlavor) as List<*>
-                    if (transferData != null && transferData.size > 0) {
+                    if (transferData != null && transferData.isNotEmpty()) {
                         viewer.importFiles(transferData as List<File>)
                         dtde.dropComplete(true)
                     }

@@ -11,6 +11,7 @@ import cz.wa.smoothmetalmap.gui.utils.ConfirmFileChooser
 import cz.wa.smoothmetalmap.gui.utils.GuiUtils
 import java.awt.BorderLayout
 import java.awt.Color
+import java.awt.GridLayout
 import java.awt.Rectangle
 import java.awt.Toolkit
 import java.awt.event.KeyEvent
@@ -35,7 +36,8 @@ class MainFrame : JFrame() {
     private var leftImage = DropTextureViewer(contentHolder)
     private var rightImage = DropTextureViewer(contentHolder)
     private var resultImage = TextureViewer(contentHolder)
-    private var roughnessCB = JCheckBox("Roughness (invert smooth)")
+    private var roughnessCB = JCheckBox("Roughness")
+    private var noAlpha0CB = JCheckBox("Min alpha = 1")
 
     private val simpleMapFrame = SimpleMapFrame(leftImage, rightImage)
 
@@ -92,19 +94,19 @@ class MainFrame : JFrame() {
         // bg color
         val bgColor = ColorSlider()
         bgColor.toolTipText = "Change background color"
-        bgColor.addListener{bgColorChanged(it)}
+        bgColor.addListener { bgColorChanged(it) }
         menu.add(bgColor)
 
         // Images
         // Left
-        leftImage.addListener{file, image -> leftImageUpdated(file, image)}
+        leftImage.addListener { file, image -> leftImageUpdated(file, image) }
 
         val leftPanel = JPanel(BorderLayout())
         leftPanel.add(BorderLayout.NORTH, leftLabel)
         leftPanel.add(BorderLayout.CENTER, leftImage)
 
         // Right
-        rightImage.addListener{file, image -> rightImageUpdated(file, image)}
+        rightImage.addListener { file, image -> rightImageUpdated(file, image) }
 
         val rightPanel = JPanel(BorderLayout())
         rightPanel.add(BorderLayout.NORTH, rightLabel)
@@ -133,8 +135,17 @@ class MainFrame : JFrame() {
 
         toolPanel.add(JLabel("                     "))
 
+        // check boxes
+        val cbPanel = JPanel(GridLayout(2, 1))
+
         roughnessCB.isSelected = true
-        toolPanel.add(roughnessCB)
+        roughnessCB.toolTipText = "Check if the input smoothness texture is roughness, inverts alpha"
+        cbPanel.add(roughnessCB)
+
+        noAlpha0CB.toolTipText = "If the alpha value is 0, will change it to 1 to prevent discarding color"
+        cbPanel.add(noAlpha0CB)
+
+        toolPanel.add(cbPanel)
 
         val generateButton = JButton("Generate")
         generateButton.addActionListener { generateMap() }
@@ -178,7 +189,12 @@ class MainFrame : JFrame() {
 
     private fun generateMap() {
         GuiUtils.runCatch(this) {
-            val img = MergeMapsCommand(leftImage.getImage()!!, rightImage.getImage()!!, roughnessCB.isSelected).generateMap()
+            val img = MergeMapsCommand(
+                leftImage.getImage()!!,
+                rightImage.getImage()!!,
+                roughnessCB.isSelected,
+                noAlpha0CB.isSelected
+            ).generateMap()
             contentHolder.outputImage = img
             resultImage.setImage(img)
             resultImage.refresh()
@@ -205,7 +221,7 @@ class MainFrame : JFrame() {
             if (imageSaveChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 var file = imageSaveChooser.selectedFile
                 if (file.extension.isBlank()) {
-                   file = File(file.absolutePath + ".png")
+                    file = File(file.absolutePath + ".png")
                 }
 
                 if (!SmoothMetalMapMain.IMAGE_SAVE_EXTS.contains(file.extension.lowercase())) {
