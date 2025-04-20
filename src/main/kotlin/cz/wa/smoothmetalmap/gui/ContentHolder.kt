@@ -1,6 +1,6 @@
 package cz.wa.smoothmetalmap.gui
 
-import cz.wa.smoothmetalmap.Settings
+import cz.wa.smoothmetalmap.settings.Settings
 import cz.wa.smoothmetalmap.gui.utils.ImageUtils
 import java.awt.image.BufferedImage
 import java.io.File

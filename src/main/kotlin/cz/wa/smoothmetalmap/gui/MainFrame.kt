@@ -21,7 +21,6 @@ import javax.imageio.ImageIO
 import javax.swing.*
 import javax.swing.filechooser.FileNameExtensionFilter
 
-
 class MainFrame : JFrame() {
     private val menu: JMenuBar = JMenuBar()
     private val help: HelpFrame = HelpFrame()
@@ -36,6 +35,16 @@ class MainFrame : JFrame() {
     private var leftImage = DropTextureViewer(contentHolder)
     private var rightImage = DropTextureViewer(contentHolder)
     private var resultImage = TextureViewer(contentHolder)
+
+    private var simplePanel = JPanel()
+    private var advancedPanel = JPanel(GridLayout(4, 1))
+
+    private var fieldR = JTextField("R1G1B1")
+    private var fieldG = JTextField("0")
+    private var fieldB = JTextField("0")
+    private var fieldA = JTextField("-R2-G2-B2")
+
+    private var simpleCB = JCheckBox("Preset for Unity")
     private var roughnessCB = JCheckBox("Roughness")
     private var noAlpha0CB = JCheckBox("Min alpha = 1")
 
@@ -44,7 +53,7 @@ class MainFrame : JFrame() {
     init {
         instance = this
         title = "Smooth Metal Map v${SmoothMetalMapMain.VERSION}"
-        defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
+        defaultCloseOperation = EXIT_ON_CLOSE
         try {
             iconImages = loadIcons()
         } catch (e: Exception) {
@@ -88,7 +97,7 @@ class MainFrame : JFrame() {
         // show bounds
         val boundsCb = JCheckBox("Show bounds")
         boundsCb.isSelected = true
-        boundsCb.addActionListener { contentHolder.settings.guiShowBounds = boundsCb.isSelected }
+        boundsCb.addActionListener { contentHolder.settings.gui.showBounds = boundsCb.isSelected }
         menu.add(boundsCb)
 
         // bg color
@@ -126,14 +135,27 @@ class MainFrame : JFrame() {
 
         // Controls
         val toolPanel = JPanel()
-        toolPanel.add(JLabel("Drag images to metallic and smoothness"))
+        var panel1 = JPanel(GridLayout(2, 1))
+        panel1.add(JLabel("Drag images to metallic and smoothness"))
+        simpleCB.isSelected = true
+        simpleCB.addChangeListener { onSimpleChanged() }
+        panel1.add(simpleCB)
+        toolPanel.add(panel1)
 
         // Generate map button
         val generateMapB = JButton("Generate missing")
         generateMapB.addActionListener { openGenerateMap() }
         toolPanel.add(generateMapB)
 
-        toolPanel.add(JLabel("                     "))
+        // Simple controls
+        simplePanel.add(JLabel("                     "))
+
+        // Advanced controls
+        initAdvancedPanel()
+
+        toolPanel.add(simplePanel)
+        advancedPanel.isVisible = false
+        toolPanel.add(advancedPanel)
 
         // check boxes
         val cbPanel = JPanel(GridLayout(2, 1))
@@ -158,6 +180,44 @@ class MainFrame : JFrame() {
         layout = BorderLayout()
         add(toolPanel, BorderLayout.NORTH)
         add(splitMain, BorderLayout.CENTER)
+    }
+
+    private fun initAdvancedPanel() {
+        var p1 = JPanel()
+        p1.add(JLabel("R ="))
+        fieldR.columns = 8
+        p1.add(fieldR)
+        advancedPanel.add(p1)
+
+        var p2 = JPanel()
+        p2.add(JLabel("G ="))
+        fieldG.columns = 8
+        p2.add(fieldG)
+        advancedPanel.add(p2)
+
+        var p3 = JPanel()
+        p3.add(JLabel("B ="))
+        fieldB.columns = 8
+        p3.add(fieldB)
+        advancedPanel.add(p3)
+
+        var p4 = JPanel()
+        p4.add(JLabel("A ="))
+        fieldA.columns = 8
+        p4.add(fieldA)
+        advancedPanel.add(p4)
+    }
+
+    private fun onSimpleChanged() {
+        if (simpleCB.isSelected) {
+            advancedPanel.isVisible = false
+            simplePanel.isVisible = true
+            roughnessCB.isEnabled = true
+        } else {
+            simplePanel.isVisible = false
+            advancedPanel.isVisible = true
+            roughnessCB.isEnabled = false
+        }
     }
 
     private fun leftImageUpdated(file: File?, image: BufferedImage) {
@@ -202,7 +262,7 @@ class MainFrame : JFrame() {
     }
 
     private fun bgColorChanged(value: Int) {
-        contentHolder.settings.guiBgColor = Color(value, value, value)
+        contentHolder.settings.gui.backgroundColor = Color(value, value, value)
         leftImage.refresh()
         rightImage.refresh()
         resultImage.refresh()
