@@ -46,7 +46,7 @@ class MainFrame : JFrame() {
 
     private var simpleCB = JCheckBox("Preset for Unity")
     private var roughnessCB = JCheckBox("Roughness")
-    private var noAlpha0CB = JCheckBox("Min alpha = 1")
+    private var alphaMin1CB = JCheckBox("Min alpha = 1")
 
     private val simpleMapFrame = SimpleMapFrame(leftImage, rightImage)
 
@@ -164,8 +164,8 @@ class MainFrame : JFrame() {
         roughnessCB.toolTipText = "Check if the input smoothness texture is roughness, inverts alpha"
         cbPanel.add(roughnessCB)
 
-        noAlpha0CB.toolTipText = "If the alpha value is 0, will change it to 1 to prevent discarding color"
-        cbPanel.add(noAlpha0CB)
+        alphaMin1CB.toolTipText = "If the alpha value is 0, will change it to 1 to prevent discarding color"
+        cbPanel.add(alphaMin1CB)
 
         toolPanel.add(cbPanel)
 
@@ -248,13 +248,10 @@ class MainFrame : JFrame() {
     }
 
     private fun generateMap() {
+        applySettings()
         GuiUtils.runCatch(this) {
-            val img = MergeMapsCommand(
-                leftImage.getImage()!!,
-                rightImage.getImage()!!,
-                roughnessCB.isSelected,
-                noAlpha0CB.isSelected
-            ).generateMap()
+            val img = MergeMapsCommand(contentHolder.settings)
+                .generateMap(leftImage.getImage()!!, rightImage.getImage()!!)
             contentHolder.outputImage = img
             resultImage.setImage(img)
             resultImage.refresh()
@@ -266,6 +263,18 @@ class MainFrame : JFrame() {
         leftImage.refresh()
         rightImage.refresh()
         resultImage.refresh()
+    }
+
+    private fun applySettings() {
+        with (contentHolder.settings.channels) {
+            simpleDefinition = simpleCB.isSelected
+            simpleRoughness = roughnessCB.isSelected
+            targetR = fieldR.text
+            targetG = fieldG.text
+            targetB = fieldB.text
+            targetA = fieldA.text
+            alphaMin1 = alphaMin1CB.isSelected
+        }
     }
 
     private fun loadIcons(): List<BufferedImage> {

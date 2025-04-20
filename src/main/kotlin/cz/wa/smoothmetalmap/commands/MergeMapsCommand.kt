@@ -1,19 +1,29 @@
 package cz.wa.smoothmetalmap.commands
 
+import cz.wa.smoothmetalmap.commands.channelitem.ChannelParser
+import cz.wa.smoothmetalmap.commands.channelitem.ChannelSource
 import cz.wa.smoothmetalmap.gui.math.ColorUtils
 import cz.wa.smoothmetalmap.gui.utils.ImageUtils
 import cz.wa.smoothmetalmap.image.Texture
+import cz.wa.smoothmetalmap.settings.Settings
 import java.awt.image.BufferedImage
 import kotlin.math.roundToInt
 
-class MergeMapsCommand(
-    private val metallicMap: BufferedImage,
-    private val smoothnessMap: BufferedImage,
-    private val roughness: Boolean,
-    private val noAlpha0: Boolean
-) {
+class MergeMapsCommand(val settings: Settings) {
 
-    fun generateMap(): BufferedImage {
+    val channels: ChannelSource?
+
+    init {
+        with(settings.channels) {
+            channels = if (simpleDefinition) {
+                null
+            } else {
+                ChannelParser.parseChannels(targetR, targetG, targetB, targetA)
+            }
+        }
+    }
+
+    fun generateMap(metallicMap: BufferedImage, smoothnessMap: BufferedImage): BufferedImage {
         check(metallicMap.width == smoothnessMap.width && metallicMap.height == smoothnessMap.height) { "The input images must have same dimensions" }
 
         val w = metallicMap.width
@@ -33,17 +43,29 @@ class MergeMapsCommand(
     }
 
     private fun convertPixel(inTexM: Texture, inTexS: Texture, x: Int, y: Int, outTex: Texture) {
+        if (settings.channels.simpleDefinition) {
+            convertPixelSimple(inTexM, inTexS, x, y, outTex)
+        } else {
+            convertPixelAdvanced(inTexM, inTexS, x, y, outTex)
+        }
+    }
+
+    private fun convertPixelSimple(inTexM: Texture, inTexS: Texture, x: Int, y: Int, outTex: Texture) {
         val pM = inTexM.getPoint(x, y)
         val pS = inTexS.getPoint(x, y)
         val r = getAverageColor(pM)
         var a = getAverageColor(pS)
-        if (roughness) {
+        if (settings.channels.simpleRoughness) {
             a = 255 - a
         }
-        if (noAlpha0 && a <= 0) {
+        if (settings.channels.alphaMin1 && a <= 0) {
             a = 1
         }
         outTex.setPoint(x, y, ColorUtils.fromRGBA(r, 0, 0, a))
+    }
+
+    private fun convertPixelAdvanced(inTexM: Texture, inTexS: Texture, x: Int, y: Int, outTex: Texture) {
+
     }
 
     private fun getAverageColor(c: Int): Int {
