@@ -75,6 +75,9 @@ object ChannelParser {
             items.add(ChannelRGBAItem(channel, positive, sourceTexture))
         }
 
+        if (items.isEmpty()) {
+            throw IllegalArgumentException("${getErrorPrefix(channelDesc)} empty definition")
+        }
         return ChannelSource(items)
     }
 
