@@ -3,7 +3,7 @@ package cz.wa.smoothmetalmap.commands.channelitem
 import java.util.Locale.getDefault
 
 object ChannelParser {
-    val regex = Regex("[-RGBA12]+")
+    val regex = Regex("[\\-RGBA12]+")
 
     fun parseChannels(strR: String, strG: String, strB: String, strA: String): Channels {
         return Channels(
@@ -31,7 +31,7 @@ object ChannelParser {
 
         // try parse multiple source channels
         if (!str.matches(regex)) {
-            throw IllegalArgumentException("${getErrorPrefix(channel)} can only contain characters: R G B A - 1 2")
+            throw IllegalArgumentException("${getErrorPrefix(channel)} can only contain characters: -RGBA12")
         }
 
         return parseChannelSource(str, channel)

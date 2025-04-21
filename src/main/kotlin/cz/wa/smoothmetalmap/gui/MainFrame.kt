@@ -11,6 +11,7 @@ import cz.wa.smoothmetalmap.gui.utils.ConfirmFileChooser
 import cz.wa.smoothmetalmap.gui.utils.GuiUtils
 import java.awt.BorderLayout
 import java.awt.Color
+import java.awt.Dimension
 import java.awt.GridLayout
 import java.awt.Rectangle
 import java.awt.Toolkit
@@ -24,6 +25,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 class MainFrame : JFrame() {
     private val menu: JMenuBar = JMenuBar()
     private val help: HelpFrame = HelpFrame()
+    private val advancedHelp: HelpFrame = HelpFrame()
     private val imageSaveChooser = ConfirmFileChooser()
     private val imagesFilter = FileNameExtensionFilter("Images (PNG)", "png")
     private val splitSource = JSplitPane(JSplitPane.HORIZONTAL_SPLIT)
@@ -32,21 +34,22 @@ class MainFrame : JFrame() {
     private val rightLabel = JLabel("Smoothness map [none]")
 
     private val contentHolder = ContentHolder()
-    private var leftImage = DropTextureViewer(contentHolder)
-    private var rightImage = DropTextureViewer(contentHolder)
-    private var resultImage = TextureViewer(contentHolder)
+    private val leftImage = DropTextureViewer(contentHolder)
+    private val rightImage = DropTextureViewer(contentHolder)
+    private val resultImage = TextureViewer(contentHolder)
 
-    private var simplePanel = JPanel()
-    private var advancedPanel = JPanel(GridLayout(4, 1))
+    private val simplePanel = JPanel()
+    private val advancedPanel = JPanel(GridLayout(4, 1))
 
-    private var fieldR = JTextField("R1G1B1")
-    private var fieldG = JTextField("0")
-    private var fieldB = JTextField("0")
-    private var fieldA = JTextField("-R2-G2-B2")
+    private val fieldR = JTextField("R1G1B1")
+    private val fieldG = JTextField("0")
+    private val fieldB = JTextField("0")
+    private val fieldA = JTextField("-R2-G2-B2")
+    private val advHelpB = JButton("Advanced help")
 
-    private var simpleCB = JCheckBox("Preset for Unity")
-    private var roughnessCB = JCheckBox("Roughness")
-    private var alphaMin1CB = JCheckBox("Min alpha = 1")
+    private val simpleCB = JCheckBox("Preset for Unity")
+    private val roughnessCB = JCheckBox("Roughness")
+    private val alphaMin1CB = JCheckBox("Min alpha = 1")
 
     private val simpleMapFrame = SimpleMapFrame(leftImage, rightImage)
 
@@ -62,8 +65,8 @@ class MainFrame : JFrame() {
 
         initComponents()
         val screenSize = Toolkit.getDefaultToolkit().screenSize
-        val initW = 800
-        val initH = 500
+        val initW = 850
+        val initH = 600
         bounds = Rectangle((screenSize.width - initW) / 2, (screenSize.height - initH) / 2, initW, initH)
         splitSource.dividerLocation = bounds.width / 3
         splitMain.dividerLocation = bounds.width * 2 / 3
@@ -135,11 +138,16 @@ class MainFrame : JFrame() {
 
         // Controls
         val toolPanel = JPanel()
-        var panel1 = JPanel(GridLayout(2, 1))
+        var panel1 = JPanel(GridLayout(3, 1))
         panel1.add(JLabel("Drag images to metallic and smoothness"))
         simpleCB.isSelected = true
         simpleCB.addChangeListener { onSimpleChanged() }
         panel1.add(simpleCB)
+
+        advHelpB.isVisible = false
+        advHelpB.addActionListener { showAdvancedHelp() }
+        panel1.add(advHelpB)
+
         toolPanel.add(panel1)
 
         // Generate map button
@@ -183,29 +191,52 @@ class MainFrame : JFrame() {
     }
 
     private fun initAdvancedPanel() {
-        var p1 = JPanel()
+        val p1 = JPanel()
         p1.add(JLabel("R ="))
         fieldR.columns = 8
         p1.add(fieldR)
         advancedPanel.add(p1)
 
-        var p2 = JPanel()
+        val p2 = JPanel()
         p2.add(JLabel("G ="))
         fieldG.columns = 8
         p2.add(fieldG)
         advancedPanel.add(p2)
 
-        var p3 = JPanel()
+        val p3 = JPanel()
         p3.add(JLabel("B ="))
         fieldB.columns = 8
         p3.add(fieldB)
         advancedPanel.add(p3)
 
-        var p4 = JPanel()
+        val p4 = JPanel()
         p4.add(JLabel("A ="))
         fieldA.columns = 8
         p4.add(fieldA)
         advancedPanel.add(p4)
+
+        advancedHelp.size = Dimension(550, 350)
+        advancedHelp.setText("<html>" +
+                "For each output color channel define its source:\n" +
+                "<ul>" +
+                "<li>Either write exact number value 0..255</li>" +
+                "<li>Or define channels from source textures:</li>" +
+                "<ul>" +
+                "<li>Channel with texture index: R1, G1, B1, A1 or R2, G2, B2, A2</li>" +
+                "<li>Each channel can be inverted using -: -R1, -G2</li>" +
+                "<li>If multiple source channels are defined, the result will be averaged</li>" +
+                "</ul>" +
+                "<li>Examples:</li>" +
+                "<ul>" +
+                "<li>0 - sets value to 0</li>" +
+                "<li>255 - sets value to 255</li>" +
+                "<li>G2 - takes green channel from second texture</li>" +
+                "<li>-R1 - takes inverted red channel from first texture</li>" +
+                "<li>R1G1B1 - takes RGB values from first texture and averages</li>" +
+                "<li>R2A2 - takes red and alpha from second texture and averages</li>" +
+                "</ul>" +
+                "</ul>" +
+                "</html>")
     }
 
     private fun onSimpleChanged() {
@@ -213,10 +244,12 @@ class MainFrame : JFrame() {
             advancedPanel.isVisible = false
             simplePanel.isVisible = true
             roughnessCB.isEnabled = true
+            advHelpB.isVisible = false
         } else {
             simplePanel.isVisible = false
             advancedPanel.isVisible = true
             roughnessCB.isEnabled = false
+            advHelpB.isVisible = true
         }
     }
 
@@ -315,6 +348,10 @@ class MainFrame : JFrame() {
         JOptionPane.showMessageDialog(
             this, "${SmoothMetalMapMain.printTitle()}${SmoothMetalMapMain.printUsage()}"
         )
+    }
+
+    private fun showAdvancedHelp() {
+        advancedHelp.isVisible = true
     }
 
     private fun showHelp() {

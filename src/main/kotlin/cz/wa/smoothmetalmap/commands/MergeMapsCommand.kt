@@ -2,6 +2,7 @@ package cz.wa.smoothmetalmap.commands
 
 import cz.wa.smoothmetalmap.commands.channelitem.ChannelParser
 import cz.wa.smoothmetalmap.commands.channelitem.ChannelSource
+import cz.wa.smoothmetalmap.commands.channelitem.Channels
 import cz.wa.smoothmetalmap.gui.math.ColorUtils
 import cz.wa.smoothmetalmap.gui.utils.ImageUtils
 import cz.wa.smoothmetalmap.image.Texture
@@ -11,7 +12,7 @@ import kotlin.math.roundToInt
 
 class MergeMapsCommand(val settings: Settings) {
 
-    val channels: ChannelSource?
+    val channels: Channels?
 
     init {
         with(settings.channels) {
@@ -65,7 +66,7 @@ class MergeMapsCommand(val settings: Settings) {
     }
 
     private fun convertPixelAdvanced(inTexM: Texture, inTexS: Texture, x: Int, y: Int, outTex: Texture) {
-
+        TODO()
     }
 
     private fun getAverageColor(c: Int): Int {
