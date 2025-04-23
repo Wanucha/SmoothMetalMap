@@ -26,7 +26,7 @@ object ChannelParser {
             if (value < 0 || value > 255) {
                 throw IllegalArgumentException("${getErrorPrefix(channel)} value is outside range 0..255 $value")
             }
-            return ChannelSource(listOf(ChannelItemValue(value)))
+            return ChannelSource(listOf(ChannelValueItem(value)))
         }
 
         // try parse multiple source channels

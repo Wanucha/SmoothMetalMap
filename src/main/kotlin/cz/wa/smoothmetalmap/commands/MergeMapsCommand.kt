@@ -87,7 +87,7 @@ class MergeMapsCommand(val settings: Settings) {
     private fun transformColor(pM: Int, pS: Int, channel: ChannelSource): Int {
         val item = channel.items[0]
         // single value item
-        if (item is ChannelItemValue) {
+        if (item is ChannelValueItem) {
             return item.value
         }
 
