@@ -43,6 +43,16 @@ object ColorUtils {
 
     fun setAlpha(c: Int, a: Int)= (c and 0xFFFFFF) or (a and 0xFF shl 24)
 
+    fun getChannelValue(c: Int, channel: Int): Int {
+        return when (channel) {
+            0 -> (c shr 16) and 0xFF // R
+            1 -> (c shr 8) and 0xFF  // G
+            2 -> c and 0xFF          // B
+            3 -> (c shr 24) and 0xFF // A
+            else -> throw IllegalArgumentException("Channel must be 0..3")
+        }
+    }
+
     fun toString(c: Int): String {
         return toString(Color(c))
     }

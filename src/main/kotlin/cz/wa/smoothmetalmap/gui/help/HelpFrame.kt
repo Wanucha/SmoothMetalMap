@@ -7,12 +7,13 @@ import javax.swing.JLabel
 import javax.swing.JScrollPane
 
 class HelpFrame: JFrame("Smooth Metal Map Help") {
+    val text1 = JLabel()
+
     init {
         bounds = Rectangle(200, 200, 500, 300)
 
         layout = BorderLayout()
 
-        var text1 = JLabel()
         text1.text = "<html>" +
                 "Merges metallic and smoothness/roughness map to be used in Unity" +
                 "<ol>" +
@@ -36,5 +37,9 @@ class HelpFrame: JFrame("Smooth Metal Map Help") {
 
         var scroll = JScrollPane(text1)
         add(scroll, BorderLayout.CENTER)
+    }
+
+    fun setText(text: String) {
+        text1.text = text
     }
 }
