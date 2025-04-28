@@ -33,6 +33,9 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
     private val propsOpenChooser = JFileChooser()
     private val propsSaveChooser = ConfirmFileChooser()
 
+    private val boundsCb = JCheckBox("Show bounds")
+    private val bgColorSlider = ColorSlider()
+
     private val imagesFilter = FileNameExtensionFilter("Images (PNG)", "png")
     private val splitSource = JSplitPane(JSplitPane.HORIZONTAL_SPLIT)
     private val splitMain = JSplitPane(JSplitPane.HORIZONTAL_SPLIT)
@@ -74,6 +77,8 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
         rightImage = DropTextureViewer(contentHolder)
         resultImage = TextureViewer(contentHolder)
         simpleMapFrame = SimpleMapFrame(leftImage, rightImage)
+
+        contentHolder.addSettingsListener { showSettings() }
 
         initComponents()
         val screenSize = Toolkit.getDefaultToolkit().screenSize
@@ -132,16 +137,14 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
         menu.add(help)
 
         // show bounds
-        val boundsCb = JCheckBox("Show bounds")
         boundsCb.isSelected = true
         boundsCb.addActionListener { contentHolder.settings.gui.showBounds = boundsCb.isSelected }
         menu.add(boundsCb)
 
         // bg color
-        val bgColor = ColorSlider()
-        bgColor.toolTipText = "Change background color"
-        bgColor.addListener { bgColorChanged(it) }
-        menu.add(bgColor)
+        bgColorSlider.toolTipText = "Change background color"
+        bgColorSlider.addListener { bgColorChanged(it) }
+        menu.add(bgColorSlider)
 
         // Images
         // Left
@@ -223,6 +226,7 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
         add(toolPanel, BorderLayout.NORTH)
         add(splitMain, BorderLayout.CENTER)
 
+        showSettings()
         SwingUtilities.invokeLater { initComponentsLater() }
     }
 
@@ -252,27 +256,29 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
         advancedPanel.add(p4)
 
         advancedHelp.size = Dimension(550, 350)
-        advancedHelp.setText("<html>" +
-                "For each output color channel define its source:\n" +
-                "<ul>" +
-                "<li>Either write exact number value 0..255</li>" +
-                "<li>Or define channels from source textures:</li>" +
-                "<ul>" +
-                "<li>Channel with texture index: R1, G1, B1, A1 or R2, G2, B2, A2</li>" +
-                "<li>Each channel can be inverted using -: -R1, -G2</li>" +
-                "<li>If multiple source channels are defined, the result will be averaged</li>" +
-                "</ul>" +
-                "<li>Examples:</li>" +
-                "<ul>" +
-                "<li>0 - sets value to 0</li>" +
-                "<li>255 - sets value to 255</li>" +
-                "<li>G2 - takes green channel from second texture</li>" +
-                "<li>-R1 - takes inverted red channel from first texture</li>" +
-                "<li>R1G1B1 - takes RGB values from first texture and averages</li>" +
-                "<li>R2A2 - takes red and alpha from second texture and averages</li>" +
-                "</ul>" +
-                "</ul>" +
-                "</html>")
+        advancedHelp.setText(
+            "<html>" +
+                    "For each output color channel define its source:\n" +
+                    "<ul>" +
+                    "<li>Either write exact number value 0..255</li>" +
+                    "<li>Or define channels from source textures:</li>" +
+                    "<ul>" +
+                    "<li>Channel with texture index: R1, G1, B1, A1 or R2, G2, B2, A2</li>" +
+                    "<li>Each channel can be inverted using -: -R1, -G2</li>" +
+                    "<li>If multiple source channels are defined, the result will be averaged</li>" +
+                    "</ul>" +
+                    "<li>Examples:</li>" +
+                    "<ul>" +
+                    "<li>0 - sets value to 0</li>" +
+                    "<li>255 - sets value to 255</li>" +
+                    "<li>G2 - takes green channel from second texture</li>" +
+                    "<li>-R1 - takes inverted red channel from first texture</li>" +
+                    "<li>R1G1B1 - takes RGB values from first texture and averages</li>" +
+                    "<li>R2A2 - takes red and alpha from second texture and averages</li>" +
+                    "</ul>" +
+                    "</ul>" +
+                    "</html>"
+        )
     }
 
     private fun initComponentsLater() {
@@ -339,8 +345,30 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
         resultImage.refresh()
     }
 
+    private fun showSettings() {
+        with(contentHolder.settings.gui) {
+            bgColorSlider.valueColor = backgroundColor
+            boundsCb.isSelected = showBounds
+        }
+
+        with(contentHolder.settings.channels) {
+            simpleCB.isSelected = simpleDefinition
+            roughnessCB.isSelected = simpleRoughness
+            fieldR.text = targetR
+            fieldG.text = targetG
+            fieldB.text = targetB
+            fieldA.text = targetA
+            alphaMin1CB.isSelected = alphaMin1
+        }
+    }
+
     private fun applySettings() {
-        with (contentHolder.settings.channels) {
+        with(contentHolder.settings.gui) {
+            backgroundColor = bgColorSlider.valueColor
+            showBounds = boundsCb.isSelected
+        }
+
+        with(contentHolder.settings.channels) {
             simpleDefinition = simpleCB.isSelected
             simpleRoughness = roughnessCB.isSelected
             targetR = fieldR.text
