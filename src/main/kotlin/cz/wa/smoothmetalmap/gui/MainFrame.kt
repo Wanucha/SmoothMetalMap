@@ -401,6 +401,7 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
     }
 
     private fun saveSettings() {
+        applySettings()
         if (propsSaveChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             var file = propsSaveChooser.selectedFile
             if (file.extension.isBlank()) {
