@@ -8,7 +8,7 @@ import java.io.File
 class SmoothMetalMapMain {
 
     companion object {
-        const val VERSION = "0.2.3"
+        const val VERSION = "0.3.0"
         val IMAGE_OPEN_EXTS = arrayOf("png", "jpg", "jpeg", "gif", "bmp")
         val IMAGE_SAVE_EXTS = arrayOf("png", "gif", "bmp")
 

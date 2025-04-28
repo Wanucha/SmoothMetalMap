@@ -113,7 +113,7 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
         openProp.addActionListener { openSettings() }
         openProp.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.CTRL_DOWN_MASK)
         settingsMenu.add(openProp)
-        propsOpenChooser.fileFilter = FileNameExtensionFilter("Settings (.yml, .yaml, .properties)", "yml", "yaml", "properties")
+        propsOpenChooser.fileFilter = FileNameExtensionFilter("Settings (.yml, .yaml)", "yml", "yaml")
 
         val saveProp = JMenuItem("Save as")
         saveProp.addActionListener { saveSettings() }
