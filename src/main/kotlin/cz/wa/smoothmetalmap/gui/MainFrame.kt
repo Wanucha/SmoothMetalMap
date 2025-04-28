@@ -9,6 +9,8 @@ import cz.wa.smoothmetalmap.gui.texturecanvas.TextureViewer
 import cz.wa.smoothmetalmap.gui.utils.ColorSlider
 import cz.wa.smoothmetalmap.gui.utils.ConfirmFileChooser
 import cz.wa.smoothmetalmap.gui.utils.GuiUtils
+import cz.wa.smoothmetalmap.settings.Settings
+import cz.wa.smoothmetalmap.settings.io.SettingsIO
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -22,21 +24,25 @@ import javax.imageio.ImageIO
 import javax.swing.*
 import javax.swing.filechooser.FileNameExtensionFilter
 
-class MainFrame : JFrame() {
+class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
     private val menu: JMenuBar = JMenuBar()
     private val help: HelpFrame = HelpFrame()
+    private val propsLabel = JMenuItem("= ")
     private val advancedHelp: HelpFrame = HelpFrame()
     private val imageSaveChooser = ConfirmFileChooser()
+    private val propsOpenChooser = JFileChooser()
+    private val propsSaveChooser = ConfirmFileChooser()
+
     private val imagesFilter = FileNameExtensionFilter("Images (PNG)", "png")
     private val splitSource = JSplitPane(JSplitPane.HORIZONTAL_SPLIT)
     private val splitMain = JSplitPane(JSplitPane.HORIZONTAL_SPLIT)
     private val leftLabel = JLabel("Metallic map [none]")
     private val rightLabel = JLabel("Smoothness map [none]")
 
-    private val contentHolder = ContentHolder()
-    private val leftImage = DropTextureViewer(contentHolder)
-    private val rightImage = DropTextureViewer(contentHolder)
-    private val resultImage = TextureViewer(contentHolder)
+    private val contentHolder: ContentHolder
+    private val leftImage: DropTextureViewer
+    private val rightImage: DropTextureViewer
+    private val resultImage: TextureViewer
 
     private val simplePanel = JPanel()
     private val advancedPanel = JPanel(GridLayout(4, 1))
@@ -51,7 +57,7 @@ class MainFrame : JFrame() {
     private val roughnessCB = JCheckBox("Roughness")
     private val alphaMin1CB = JCheckBox("Min alpha = 1")
 
-    private val simpleMapFrame = SimpleMapFrame(leftImage, rightImage)
+    private val simpleMapFrame: SimpleMapFrame
 
     init {
         instance = this
@@ -62,6 +68,12 @@ class MainFrame : JFrame() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        contentHolder = ContentHolder(settings, settingsFile)
+        leftImage = DropTextureViewer(contentHolder)
+        rightImage = DropTextureViewer(contentHolder)
+        resultImage = TextureViewer(contentHolder)
+        simpleMapFrame = SimpleMapFrame(leftImage, rightImage)
 
         initComponents()
         val screenSize = Toolkit.getDefaultToolkit().screenSize
@@ -74,6 +86,7 @@ class MainFrame : JFrame() {
     }
 
     private fun initComponents() {
+
         // Menu
         jMenuBar = menu
 
@@ -86,6 +99,27 @@ class MainFrame : JFrame() {
         saveImage.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK)
         imageMenu.add(saveImage)
         imageSaveChooser.fileFilter = imagesFilter
+
+        // settings
+        val settingsMenu = JMenu("Settings")
+        menu.add(settingsMenu)
+
+        val openProp = JMenuItem("Open")
+        openProp.addActionListener { openSettings() }
+        openProp.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.CTRL_DOWN_MASK)
+        settingsMenu.add(openProp)
+        propsOpenChooser.fileFilter = FileNameExtensionFilter("Settings (.yml, .yaml, .properties)", "yml", "yaml", "properties")
+
+        val saveProp = JMenuItem("Save as")
+        saveProp.addActionListener { saveSettings() }
+        saveProp.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_U, KeyEvent.CTRL_DOWN_MASK)
+        settingsMenu.add(saveProp)
+        propsSaveChooser.fileFilter = FileNameExtensionFilter("Settings (.yml, .yaml)", "yml", "yaml")
+
+        // props label
+        propsLabel.isEnabled = false
+        propsLabel.text = "= ${contentHolder.settingsFile?.name}"
+        menu.add(propsLabel)
 
         // args help
         val argsHelp = JMenuItem("Program args")
@@ -138,7 +172,7 @@ class MainFrame : JFrame() {
 
         // Controls
         val toolPanel = JPanel()
-        var panel1 = JPanel(GridLayout(3, 1))
+        val panel1 = JPanel(GridLayout(3, 1))
         panel1.add(JLabel("Drag images to metallic and smoothness"))
         simpleCB.isSelected = true
         simpleCB.addChangeListener { onSimpleChanged() }
@@ -188,6 +222,8 @@ class MainFrame : JFrame() {
         layout = BorderLayout()
         add(toolPanel, BorderLayout.NORTH)
         add(splitMain, BorderLayout.CENTER)
+
+        SwingUtilities.invokeLater { initComponentsLater() }
     }
 
     private fun initAdvancedPanel() {
@@ -237,6 +273,11 @@ class MainFrame : JFrame() {
                 "</ul>" +
                 "</ul>" +
                 "</html>")
+    }
+
+    private fun initComponentsLater() {
+        propsOpenChooser.currentDirectory = contentHolder.settingsFile
+        propsSaveChooser.currentDirectory = contentHolder.settingsFile
     }
 
     private fun onSimpleChanged() {
@@ -316,6 +357,34 @@ class MainFrame : JFrame() {
             ImageIO.read(MainFrame::class.java.getResourceAsStream("/icon32.png")),
             ImageIO.read(MainFrame::class.java.getResourceAsStream("/icon64.png"))
         )
+    }
+
+    private fun openSettings() {
+        if (propsOpenChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            GuiUtils.runCatch(this) {
+                val file = propsOpenChooser.selectedFile
+                contentHolder.settings = SettingsIO.load(file)
+                propsLabel.text = "= ${contentHolder.settingsFile?.name}"
+                SwingUtilities.invokeLater {
+                    contentHolder.callSettingsListeners()
+                }
+            }
+        }
+    }
+
+    private fun saveSettings() {
+        if (propsSaveChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            var file = propsSaveChooser.selectedFile
+            if (file.extension.isBlank()) {
+                file = File(file.path + ".yml")
+            }
+            GuiUtils.runCatch(this) {
+                SettingsIO.save(file, contentHolder.settings)
+                if (!file.isFile) {
+                    JOptionPane.showMessageDialog(this@MainFrame, "File not saved: ${file.absolutePath}")
+                }
+            }
+        }
     }
 
     private fun saveImage() {
