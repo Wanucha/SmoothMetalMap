@@ -2,7 +2,7 @@ package cz.wa.smoothmetalmap.gui
 
 import cz.wa.smoothmetalmap.SmoothMetalMapMain
 import cz.wa.smoothmetalmap.commands.MergeMapsCommand
-import cz.wa.smoothmetalmap.commands.channelitem.ChannelFunc
+import cz.wa.smoothmetalmap.commands.channelitem.AggrFunc
 import cz.wa.smoothmetalmap.gui.channel.ChannelSelector
 import cz.wa.smoothmetalmap.gui.help.HelpFrame
 import cz.wa.smoothmetalmap.gui.simplemap.SimpleMapFrame
@@ -52,10 +52,10 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
     private val simplePanel = JPanel()
     private val advancedPanel = JPanel(GridLayout(4, 1))
 
-    private val fieldR = ChannelSelector("R", "R1G1B1", ChannelFunc.AVG)
-    private val fieldG = ChannelSelector("G", "0", ChannelFunc.AVG)
-    private val fieldB = ChannelSelector("B", "0", ChannelFunc.AVG)
-    private val fieldA = ChannelSelector("A", "-R2-G2-B2", ChannelFunc.AVG)
+    private val fieldR = ChannelSelector("R =", "R1G1B1", AggrFunc.AVG)
+    private val fieldG = ChannelSelector("G =", "0", AggrFunc.AVG)
+    private val fieldB = ChannelSelector("B =", "0", AggrFunc.AVG)
+    private val fieldA = ChannelSelector("A =", "-R2-G2-B2", AggrFunc.AVG)
     private val advHelpB = JButton("Advanced help")
 
     private val simpleCB = JCheckBox("Preset for Unity")
@@ -248,7 +248,7 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
                     "<ul>" +
                     "<li>Channel with texture index: R1, G1, B1, A1 or R2, G2, B2, A2</li>" +
                     "<li>Each channel can be inverted using -: -R1, -G2</li>" +
-                    "<li>If multiple source channels are defined, the aggregation function will be applied</li>" +
+                    "<li>If multiple source channels are defined,<br>the selected aggregation function will be applied</li>" +
                     "</ul>" +
                     "<li>Examples:</li>" +
                     "<ul>" +
@@ -341,6 +341,10 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
             fieldG.channelText = targetG
             fieldB.channelText = targetB
             fieldA.channelText = targetA
+            fieldR.aggrFunc = aggrFuncR
+            fieldG.aggrFunc = aggrFuncG
+            fieldB.aggrFunc = aggrFuncB
+            fieldA.aggrFunc = aggrFuncA
             alphaMin1CB.isSelected = alphaMin1
         }
     }
@@ -358,6 +362,10 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
             targetG = fieldG.channelText
             targetB = fieldB.channelText
             targetA = fieldA.channelText
+            aggrFuncR = fieldR.aggrFunc
+            aggrFuncG = fieldG.aggrFunc
+            aggrFuncB = fieldB.aggrFunc
+            aggrFuncA = fieldA.aggrFunc
             alphaMin1 = alphaMin1CB.isSelected
         }
     }

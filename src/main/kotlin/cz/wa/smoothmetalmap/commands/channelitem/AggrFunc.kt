@@ -1,6 +1,6 @@
 package cz.wa.smoothmetalmap.commands.channelitem
 
-enum class ChannelFunc {
+enum class AggrFunc {
     AVG,
     MIN,
     MAX,

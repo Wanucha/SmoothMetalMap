@@ -15,10 +15,14 @@ class MergeMapsCommand(val settings: Settings) {
 
     init {
         with(settings.channels) {
-            channels = if (simpleDefinition) {
-                null
+            if (simpleDefinition) {
+                channels = null
             } else {
-                ChannelParser.parseChannels(targetR, targetG, targetB, targetA)
+                channels = ChannelParser.parseChannels(targetR, targetG, targetB, targetA)
+                channels.sourceR.aggrFunc = settings.channels.aggrFuncR
+                channels.sourceG.aggrFunc = settings.channels.aggrFuncG
+                channels.sourceB.aggrFunc = settings.channels.aggrFuncB
+                channels.sourceA.aggrFunc = settings.channels.aggrFuncA
             }
         }
     }
@@ -100,7 +104,11 @@ class MergeMapsCommand(val settings: Settings) {
                 throw IllegalArgumentException("Unexpected item type $item")
             }
         }
-        val ret = valueList.average().roundToInt()
+        val ret = when(channel.aggrFunc) {
+            AggrFunc.AVG -> valueList.average().roundToInt()
+            AggrFunc.MIN -> valueList.min()
+            AggrFunc.MAX -> valueList.max()
+        }
         valueList.clear()
         return ret
     }

@@ -1,6 +1,6 @@
 package cz.wa.smoothmetalmap.gui.channel
 
-import cz.wa.smoothmetalmap.commands.channelitem.ChannelFunc
+import cz.wa.smoothmetalmap.commands.channelitem.AggrFunc
 import java.awt.LayoutManager
 import javax.swing.JComboBox
 import javax.swing.JLabel
@@ -15,7 +15,7 @@ class ChannelSelector : JPanel {
     constructor(layout: LayoutManager?) : super(layout)
     constructor(isDoubleBuffered: Boolean) : super(isDoubleBuffered)
     constructor() : super()
-    constructor(labelText: String, channelText: String, aggrFunc: ChannelFunc) {
+    constructor(labelText: String, channelText: String, aggrFunc: AggrFunc) {
         label.text = labelText
         channelDef.text = channelText
         funcCb.selectedItem = aggrFunc
@@ -23,7 +23,7 @@ class ChannelSelector : JPanel {
 
     private val label = JLabel("C")
     private val channelDef = JTextField("C1C2C3")
-    private val funcCb = JComboBox(ChannelFunc.values())
+    private val funcCb = JComboBox(AggrFunc.values())
 
     var labelText: String
         get() = label.text
@@ -37,8 +37,8 @@ class ChannelSelector : JPanel {
             channelDef.text = value
         }
 
-    var aggrFunc: ChannelFunc
-        get() = funcCb.selectedItem as ChannelFunc
+    var aggrFunc: AggrFunc
+        get() = funcCb.selectedItem as AggrFunc
         set(value) {
             funcCb.selectedItem = value
         }
