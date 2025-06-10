@@ -2,6 +2,8 @@ package cz.wa.smoothmetalmap.gui
 
 import cz.wa.smoothmetalmap.SmoothMetalMapMain
 import cz.wa.smoothmetalmap.commands.MergeMapsCommand
+import cz.wa.smoothmetalmap.commands.channelitem.ChannelFunc
+import cz.wa.smoothmetalmap.gui.channel.ChannelSelector
 import cz.wa.smoothmetalmap.gui.help.HelpFrame
 import cz.wa.smoothmetalmap.gui.simplemap.SimpleMapFrame
 import cz.wa.smoothmetalmap.gui.texturecanvas.DropTextureViewer
@@ -50,10 +52,10 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
     private val simplePanel = JPanel()
     private val advancedPanel = JPanel(GridLayout(4, 1))
 
-    private val fieldR = JTextField("R1G1B1")
-    private val fieldG = JTextField("0")
-    private val fieldB = JTextField("0")
-    private val fieldA = JTextField("-R2-G2-B2")
+    private val fieldR = ChannelSelector("R", "R1G1B1", ChannelFunc.AVG)
+    private val fieldG = ChannelSelector("G", "0", ChannelFunc.AVG)
+    private val fieldB = ChannelSelector("B", "0", ChannelFunc.AVG)
+    private val fieldA = ChannelSelector("A", "-R2-G2-B2", ChannelFunc.AVG)
     private val advHelpB = JButton("Advanced help")
 
     private val simpleCB = JCheckBox("Preset for Unity")
@@ -82,7 +84,7 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
 
         initComponents()
         val screenSize = Toolkit.getDefaultToolkit().screenSize
-        val initW = 850
+        val initW = 880
         val initH = 600
         bounds = Rectangle((screenSize.width - initW) / 2, (screenSize.height - initH) / 2, initW, initH)
         splitSource.dividerLocation = bounds.width / 3
@@ -231,29 +233,10 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
     }
 
     private fun initAdvancedPanel() {
-        val p1 = JPanel()
-        p1.add(JLabel("R ="))
-        fieldR.columns = 8
-        p1.add(fieldR)
-        advancedPanel.add(p1)
-
-        val p2 = JPanel()
-        p2.add(JLabel("G ="))
-        fieldG.columns = 8
-        p2.add(fieldG)
-        advancedPanel.add(p2)
-
-        val p3 = JPanel()
-        p3.add(JLabel("B ="))
-        fieldB.columns = 8
-        p3.add(fieldB)
-        advancedPanel.add(p3)
-
-        val p4 = JPanel()
-        p4.add(JLabel("A ="))
-        fieldA.columns = 8
-        p4.add(fieldA)
-        advancedPanel.add(p4)
+        advancedPanel.add(fieldR)
+        advancedPanel.add(fieldG)
+        advancedPanel.add(fieldB)
+        advancedPanel.add(fieldA)
 
         advancedHelp.size = Dimension(550, 350)
         advancedHelp.setText(
@@ -265,7 +248,7 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
                     "<ul>" +
                     "<li>Channel with texture index: R1, G1, B1, A1 or R2, G2, B2, A2</li>" +
                     "<li>Each channel can be inverted using -: -R1, -G2</li>" +
-                    "<li>If multiple source channels are defined, the result will be averaged</li>" +
+                    "<li>If multiple source channels are defined, the aggregation function will be applied</li>" +
                     "</ul>" +
                     "<li>Examples:</li>" +
                     "<ul>" +
@@ -354,10 +337,10 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
         with(contentHolder.settings.channels) {
             simpleCB.isSelected = simpleDefinition
             roughnessCB.isSelected = simpleRoughness
-            fieldR.text = targetR
-            fieldG.text = targetG
-            fieldB.text = targetB
-            fieldA.text = targetA
+            fieldR.channelText = targetR
+            fieldG.channelText = targetG
+            fieldB.channelText = targetB
+            fieldA.channelText = targetA
             alphaMin1CB.isSelected = alphaMin1
         }
     }
@@ -371,10 +354,10 @@ class MainFrame(settings: Settings, settingsFile: File?) : JFrame() {
         with(contentHolder.settings.channels) {
             simpleDefinition = simpleCB.isSelected
             simpleRoughness = roughnessCB.isSelected
-            targetR = fieldR.text
-            targetG = fieldG.text
-            targetB = fieldB.text
-            targetA = fieldA.text
+            targetR = fieldR.channelText
+            targetG = fieldG.channelText
+            targetB = fieldB.channelText
+            targetA = fieldA.channelText
             alphaMin1 = alphaMin1CB.isSelected
         }
     }
