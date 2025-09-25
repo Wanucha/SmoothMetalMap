@@ -7,9 +7,9 @@ import cz.wa.smoothmetalmap.gui.math.ColorUtils
 import java.awt.Color
 
 class ColorDeserializer : JsonDeserializer<Color>() {
-    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Color {
-        val hex = p.text.trim()
-        require(hex.matches(Regex("^#?[0-9a-fA-F]{6}$"))) { "Invalid color format: $hex" }
-        return ColorUtils.parse (hex)
-    }
+	override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Color {
+		val hex = p.text.trim()
+		require(hex.matches(Regex("^#?[0-9a-fA-F]{6}$"))) { "Invalid color format: $hex" }
+		return ColorUtils.parse(hex)
+	}
 }

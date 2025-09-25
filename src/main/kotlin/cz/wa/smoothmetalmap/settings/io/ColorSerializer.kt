@@ -7,8 +7,8 @@ import cz.wa.smoothmetalmap.gui.math.ColorUtils
 import java.awt.Color
 
 class ColorSerializer : JsonSerializer<Color>() {
-    override fun serialize(value: Color, gen: JsonGenerator, serializers: SerializerProvider) {
-        val hex = ColorUtils.toString(value)
-        gen.writeString(hex)
-    }
+	override fun serialize(value: Color, gen: JsonGenerator, serializers: SerializerProvider) {
+		val hex = ColorUtils.toString(value)
+		gen.writeString(hex)
+	}
 }

@@ -5,128 +5,133 @@ import cz.wa.smoothmetalmap.gui.ContentHolder
 import cz.wa.smoothmetalmap.gui.MainFrame
 import cz.wa.smoothmetalmap.gui.utils.GuiUtils
 import java.awt.datatransfer.DataFlavor
-import java.awt.dnd.*
+import java.awt.dnd.DnDConstants
+import java.awt.dnd.DropTarget
+import java.awt.dnd.DropTargetDragEvent
+import java.awt.dnd.DropTargetDropEvent
+import java.awt.dnd.DropTargetEvent
+import java.awt.dnd.DropTargetListener
 import java.awt.image.BufferedImage
 import java.io.File
-import java.util.*
+import java.util.TooManyListenersException
 import javax.imageio.ImageIO
 
 /**
  * Allows drag and drop images from OS
  */
 open class DropTextureViewer(contentHolder: ContentHolder) : TextureViewer(contentHolder) {
-    private var dropTarget: DropTarget? = null
-    private var dropTargetHandler: DropTargetHandler? = null
-    private val listeners = HashSet<(File?, BufferedImage) -> Unit>()
+	private var dropTarget: DropTarget? = null
+	private var dropTargetHandler: DropTargetHandler? = null
+	private val listeners = HashSet<(File?, BufferedImage) -> Unit>()
 
-    fun addListener(l: (File?, BufferedImage) -> Unit) {
-        listeners.add(l)
-    }
+	fun addListener(l: (File?, BufferedImage) -> Unit) {
+		listeners.add(l)
+	}
 
-    fun removeListener(l: (File?, BufferedImage) -> Unit) {
-        listeners.remove(l)
-    }
+	fun removeListener(l: (File?, BufferedImage) -> Unit) {
+		listeners.remove(l)
+	}
 
-    fun getCustomImage1() : BufferedImage? {
-        return customImage
-    }
+	fun getCustomImage1(): BufferedImage? {
+		return customImage
+	}
 
-    fun setCustomImage1(image: BufferedImage) {
-        customImage = image
-        refresh()
-        for (l in listeners) {
-            l.invoke(null, customImage!!)
-        }
-    }
+	fun setCustomImage1(image: BufferedImage) {
+		customImage = image
+		refresh()
+		for (l in listeners) {
+			l.invoke(null, customImage!!)
+		}
+	}
 
-    private fun importFiles(files: List<File>) {
-        for (file in files) {
-            if (SmoothMetalMapMain.IMAGE_OPEN_EXTS.contains(file.extension.lowercase())) {
-                GuiUtils.runCatch(MainFrame.instance!!) {
-                    customImage = ImageIO.read(file)
-                    refresh()
-                    for (l in listeners) {
-                        l.invoke(file, customImage!!)
-                    }
-                }
-                return
-            }
-        }
-    }
+	private fun importFiles(files: List<File>) {
+		for (file in files) {
+			if (SmoothMetalMapMain.IMAGE_OPEN_EXTS.contains(file.extension.lowercase())) {
+				GuiUtils.runCatch(MainFrame.instance!!) {
+					customImage = ImageIO.read(file)
+					refresh()
+					for (l in listeners) {
+						l.invoke(file, customImage!!)
+					}
+				}
+				return
+			}
+		}
+	}
 
-    private fun getMyDropTarget(): DropTarget? {
-        if (dropTarget == null) {
-            dropTarget = DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, null)
-        }
-        return dropTarget
-    }
+	private fun getMyDropTarget(): DropTarget? {
+		if (dropTarget == null) {
+			dropTarget = DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, null)
+		}
+		return dropTarget
+	}
 
-    protected fun getDropTargetHandler(): DropTargetHandler? {
-        if (dropTargetHandler == null) {
-            dropTargetHandler = DropTargetHandler(this)
-        }
-        return dropTargetHandler
-    }
+	protected fun getDropTargetHandler(): DropTargetHandler? {
+		if (dropTargetHandler == null) {
+			dropTargetHandler = DropTargetHandler(this)
+		}
+		return dropTargetHandler
+	}
 
-    override fun addNotify() {
-        super.addNotify()
-        try {
-            getMyDropTarget()?.addDropTargetListener(getDropTargetHandler())
-        } catch (ex: TooManyListenersException) {
-            ex.printStackTrace()
-        }
-    }
+	override fun addNotify() {
+		super.addNotify()
+		try {
+			getMyDropTarget()?.addDropTargetListener(getDropTargetHandler())
+		} catch (ex: TooManyListenersException) {
+			ex.printStackTrace()
+		}
+	}
 
-    override fun removeNotify() {
-        super.removeNotify()
-        getMyDropTarget()?.removeDropTargetListener(getDropTargetHandler())
-    }
+	override fun removeNotify() {
+		super.removeNotify()
+		getMyDropTarget()?.removeDropTargetListener(getDropTargetHandler())
+	}
 
-    protected open class DropTargetHandler(private val viewer: DropTextureViewer) : DropTargetListener {
-        protected fun processDrag(dtde: DropTargetDragEvent) {
-            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                dtde.acceptDrag(DnDConstants.ACTION_COPY)
-            } else {
-                dtde.rejectDrag()
-            }
-        }
+	protected open class DropTargetHandler(private val viewer: DropTextureViewer) : DropTargetListener {
+		protected fun processDrag(dtde: DropTargetDragEvent) {
+			if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+				dtde.acceptDrag(DnDConstants.ACTION_COPY)
+			} else {
+				dtde.rejectDrag()
+			}
+		}
 
-        override fun dragEnter(dtde: DropTargetDragEvent) {
-            processDrag(dtde)
-            //SwingUtilities.invokeLater(DragUpdate(true, dtde.location))
-            viewer.refresh()
-        }
+		override fun dragEnter(dtde: DropTargetDragEvent) {
+			processDrag(dtde)
+			//SwingUtilities.invokeLater(DragUpdate(true, dtde.location))
+			viewer.refresh()
+		}
 
-        override fun dragOver(dtde: DropTargetDragEvent) {
-            processDrag(dtde)
-            //SwingUtilities.invokeLater(DragUpdate(true, dtde.location))
-            viewer.refresh()
-        }
+		override fun dragOver(dtde: DropTargetDragEvent) {
+			processDrag(dtde)
+			//SwingUtilities.invokeLater(DragUpdate(true, dtde.location))
+			viewer.refresh()
+		}
 
-        override fun dropActionChanged(dtde: DropTargetDragEvent) {}
+		override fun dropActionChanged(dtde: DropTargetDragEvent) {}
 
-        override fun dragExit(dte: DropTargetEvent) {
-            //SwingUtilities.invokeLater(DragUpdate(false, null))
-            viewer.refresh()
-        }
+		override fun dragExit(dte: DropTargetEvent) {
+			//SwingUtilities.invokeLater(DragUpdate(false, null))
+			viewer.refresh()
+		}
 
-        override fun drop(dtde: DropTargetDropEvent) {
-            //SwingUtilities.invokeLater(DragUpdate(false, null))
-            val transferable = dtde.transferable
-            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                dtde.acceptDrop(dtde.dropAction)
-                try {
-                    val transferData = transferable.getTransferData(DataFlavor.javaFileListFlavor) as List<*>
-                    if (transferData != null && transferData.isNotEmpty()) {
-                        viewer.importFiles(transferData as List<File>)
-                        dtde.dropComplete(true)
-                    }
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                }
-            } else {
-                dtde.rejectDrop()
-            }
-        }
-    }
+		override fun drop(dtde: DropTargetDropEvent) {
+			//SwingUtilities.invokeLater(DragUpdate(false, null))
+			val transferable = dtde.transferable
+			if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+				dtde.acceptDrop(dtde.dropAction)
+				try {
+					val transferData = transferable.getTransferData(DataFlavor.javaFileListFlavor) as List<*>
+					if (transferData != null && transferData.isNotEmpty()) {
+						viewer.importFiles(transferData as List<File>)
+						dtde.dropComplete(true)
+					}
+				} catch (ex: Exception) {
+					ex.printStackTrace()
+				}
+			} else {
+				dtde.rejectDrop()
+			}
+		}
+	}
 }
